@@ -29,10 +29,27 @@ jobs:
         run: |
           docker build -t maryemwh/devops-flask-app:latest .
 
+      - name: Debug Docker secrets
+        run: |
+          echo "USERNAME = '${{ secrets.DOCKER_USERNAME }}'"
+          echo "PASSWORD length = '${{ secrets.DOCKER_PASSWORD != '' && 'SET' || 'EMPTY' }}'"
+
+      - name: Fail early if secrets are missing
+        run: |
+          if [ -z "${{ secrets.DOCKER_USERNAME }}" ] || [ -z "${{ secrets.DOCKER_PASSWORD }}" ]; then
+            echo "❌ Missing Docker secrets"
+            exit 1
+          else
+            echo "✅ Secrets are properly set"
+          fi
+  
+
       - name: Log in to Docker Hub
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
+    
+      
       - name: Push Docker image
         run: |
           docker push maryemwh/devops-flask-app:latest
